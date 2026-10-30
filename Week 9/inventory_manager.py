@@ -376,33 +376,45 @@ class MainProgram:
 class FileHandling:
     """Loads inventory data from JSON and saves inventory data to JSON."""
 
-    def load_inventory(self, file_name, inventory_obj):
-        """Load products from JSON file into Inventory object as Product instances."""
-        try:
-            with open(file_name, "r") as f:
-                data = json.load(f)
-                for item in data:
-                    inventory_obj.add_product(item["id"], item["name"], item["price"], item["quantity"])
-        except FileNotFoundError:
-            pass
-        except json.JSONDecodeError:
-            pass
+    def save_inventory(self, filename, inventory):
+        data = []
+        for product in inventory.get_products():
+            item = {
+                "product_id": product.get_id(),
+                "name": product.get_name(),
+                "price": product.get_price(),
+                "quantity": product.get_quantity(),
+            }
+            if isinstance(product, PhysicalProduct):
+                item["type"] = "physical"
+                item["weight"] = product.get_weight()
+            elif isinstance(product, DigitalProduct):
+                item["type"] = "digital"
+                item["download_size"] = product.get_download_size()
+            data.append(item)
 
-    def save_inventory(self, file_name, inventory_obj):
-        """Convert Product objects to dictionaries and save to JSON."""
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=4)
+
+    def load_inventory(self, filename, inventory):
         try:
-            products_data = []
-            for product in inventory_obj.get_products():
-                products_data.append({
-                    "id": product.get_id(),
-                    "name": product.get_name(),
-                    "price": product.get_price(),
-                    "quantity": product.get_quantity()
-                })
-            with open(file_name, "w") as f:
-                json.dump(products_data, f, indent=4)
-        except Exception as e:
-            print(f"Error saving file: {e}\n")
+            with open(filename, "r") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            return
+
+        for item in data:
+            if item.get("type") == "digital":
+                product = DigitalProduct(
+                    item["product_id"], item["name"], item["price"],
+                    item["quantity"], item["download_size"]
+                )
+            else:
+                product = PhysicalProduct(
+                    item["product_id"], item["name"], item["price"],
+                    item["quantity"], item.get("weight", 0)
+                )
+            inventory.add_product(product)
 
 
 #---- THE MENU SHIT -----
