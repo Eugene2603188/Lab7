@@ -166,7 +166,7 @@ class MainProgram:
 
     def handle_add_product(self):
         print("\nAdd New Product")
-        
+
         # INPUT 1: Get and validate Product ID - must be numbers only
         while True:
             try:
@@ -187,19 +187,18 @@ class MainProgram:
                     product = existing_products[0]
                     print(f"\nP{product_id} already added to cart.")
                     print(f"Name: {product.get_name()} | Price: ${product.get_price():.2f} | Current Stock: {product.get_quantity()}")
-                    
+
                     # VALIDATE YES/NO ONLY
                     while True:
                         response = input("Do you want to continue adding more? (yes/no): ").strip().lower()
                         if response in ["yes", "no"]:
                             break
-                        else:
-                            print("Invalid input. Please enter 'yes' or 'no'.")
-                    
+                        print("Invalid input. Please enter 'yes' or 'no'.")
+
                     if response == "no":
                         print("Cancelled.")
                         return
-                
+
                 break
             except:
                 print("Invalid input. Please enter a valid product ID.")
@@ -218,13 +217,45 @@ class MainProgram:
             except ValueError:
                 print("Invalid input. Please enter a valid price (e.g., 9.99)")
 
-        # INPUT 4: Get and validate Stock Quantity - must be number, check 500 limit
+        # INPUT 4: Choose product type
+        while True:
+            print("\nProduct type:")
+            print("1. Physical")
+            print("2. Digital")
+            product_type = input("Choose type (1 or 2): ").strip()
+            if product_type in ["1", "2"]:
+                break
+            print("Invalid choice. Enter 1 or 2.")
+
+        # INPUT 5: Extra field depends on type
+        if product_type == "1":
+            while True:
+                try:
+                    weight = float(input("Weight (kg): ").strip())
+                    if weight <= 0:
+                        print("Weight must be greater than 0.")
+                        continue
+                    break
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+        else:
+            while True:
+                try:
+                    download_size = float(input("Download size (MB): ").strip())
+                    if download_size <= 0:
+                        print("Download size must be greater than 0.")
+                        continue
+                    break
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+
+        # INPUT 6: Get and validate Stock Quantity - must be number, check 500 limit
         while True:
             qty_input = input("Stock Quantity: ").strip()
 
             if qty_input.lower() == "quit":
                 print("Cancelled.")
-                break
+                return
 
             if not qty_input.isdigit():
                 print("Invalid input. Quantity must be a positive number.")
@@ -248,8 +279,13 @@ class MainProgram:
                 print(f"Current stock: {current_total} | Max allowed: 500 | Available space: {500 - current_total}")
                 continue
 
-            self.inventory.add_product(product_id, product_name, price, valid_quantity)
-            print("\nProduct added successfully!")
+            # Create the matching subclass object and pass it to Inventory
+            if product_type == "1":
+                product = PhysicalProduct(product_id, product_name, price, valid_quantity, weight)
+            else:
+                product = DigitalProduct(product_id, product_name, price, valid_quantity, download_size)
+            self.inventory.add_product(product)
+            print(f"Product P{product_id} added successfully.")
             break
 
     def handle_update_stock(self):
