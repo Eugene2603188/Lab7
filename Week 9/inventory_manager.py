@@ -60,6 +60,23 @@ class DigitalProduct(Product):
     def get_fulfilment_info(self):
         return "Delivered digitally. Download size: " + str(self.__download_size) + " MB"
 
+class PhysicalProduct(Product):
+    """A product that is shipped to the customer."""
+
+    def __init__(self, product_id, name, price, quantity, weight):
+        super().__init__(product_id, name, price, quantity)
+        self.__weight = weight
+
+    def get_weight(self):
+        return self.__weight
+
+    def get_fulfilment_info(self):
+        return "Ships to the customer's address."
+
+    def display_information(self):
+        super().display_information()
+        print(f"Weight: {self.__weight} kg")
+
 class Inventory:
     """Manages a collection of products in the inventory."""
     
