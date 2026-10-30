@@ -3,7 +3,7 @@ import os
 
 from abc import ABC, abstractmethod
 
-file_name = "Week 6/inventory.json"
+file_name = "Week 9/inventory.json"
 
 class Product(ABC):
     """Represents a single product in the inventory."""
