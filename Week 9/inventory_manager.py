@@ -88,11 +88,10 @@ class Inventory:
         """Return total quantity of all products in inventory."""
         return sum(product.get_quantity() for product in self.__products)
     
-    def add_product(self, product_id, name, price, quantity):
-        """Add a new product to the inventory."""
-        product = Product(product_id, name, price, quantity)
+    def add_product(self, product):
+        """Add a product object (Physical or Digital) to the inventory."""
         self.__products.append(product)
-    
+
     def search_product_by_term(self, search_term):
         """Search for products by ID or name. Returns list of matching products."""
         found_items = []
