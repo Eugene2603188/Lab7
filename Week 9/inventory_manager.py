@@ -47,6 +47,19 @@ class Product(ABC):
     def get_quantity(self):
         return self.__quantity
 
+class DigitalProduct(Product):
+    """A product delivered as a download."""
+
+    def __init__(self, product_id, name, price, quantity, download_size):
+        super().__init__(product_id, name, price, quantity)
+        self.__download_size = download_size
+
+    def get_download_size(self):
+        return self.__download_size
+
+    def get_fulfilment_info(self):
+        return "Delivered digitally. Download size: " + str(self.__download_size) + " MB"
+
 class Inventory:
     """Manages a collection of products in the inventory."""
     
@@ -345,5 +358,5 @@ if __name__ == "__main__":
     program = MainProgram(file_name)
     program.run()
 
-#Eugene Repo URL: https://github.com/Eugene2603188/Lab6
+#Eugene Repo URL: https://github.com/Eugene2603188/Lab7
 
