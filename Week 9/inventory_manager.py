@@ -5,6 +5,13 @@ from abc import ABC, abstractmethod
 
 file_name = "Week 9/inventory.json"
 
+class CanBeShipped(ABC):
+    """Interface for products that can be shipped."""
+
+    @abstractmethod
+    def calculate_shipping_cost(self):
+        pass
+
 class Product(ABC):
     """Represents a single product in the inventory."""
 
@@ -22,17 +29,19 @@ class Product(ABC):
     def update_stock(self, new_quantity):
         """Update the stock quantity for this product."""
         self.__quantity = new_quantity
-    
-    def display_information(self):
-        """Display product in multi-line format (for search)."""
-        print(f"ID: P{self.__product_id}")
-        print(f"Name: {self.__name}")
-        print(f"Price: ${self.__price:.2f}")
-        print(f"Stock: {self.__quantity}")
 
     def display_single_line(self):
         """Display product in single-line format (for inventory list)."""
         print(f"ID: P{self.__product_id} | Name: {self.__name} | Price: ${self.__price:.2f} | Stock: {self.__quantity}")
+
+    def get_info_string(self):
+        return (f"ID: P{self.get_id():<6} | "
+                f"Name: {self.get_name():<15} | "
+                f"Price: ${self.get_price():>8.2f} | "
+                f"Stock: {self.get_quantity():>3}")
+
+    def display_information(self):
+        print(self.get_info_string())
     
     # Getters (to read private attributes from outside the class)
     def get_id(self):
@@ -59,8 +68,12 @@ class DigitalProduct(Product):
 
     def get_fulfilment_info(self):
         return "Delivered digitally. Download size: " + str(self.__download_size) + " MB"
+    
+    def get_info_string(self):
+        return (super().get_info_string() +
+                f" | Type: {'Digital':<8} | Download size: {self.get_download_size():>5} MB")
 
-class PhysicalProduct(Product):
+class PhysicalProduct(Product, CanBeShipped):
     """A product that is shipped to the customer."""
 
     def __init__(self, product_id, name, price, quantity, weight):
@@ -73,9 +86,13 @@ class PhysicalProduct(Product):
     def get_fulfilment_info(self):
         return "Ships to the customer's address."
 
-    def display_information(self):
-        super().display_information()
-        print(f"Weight: {self.__weight} kg")
+    def get_info_string(self):
+        return (super().get_info_string() +
+                f" | Type: {'Physical':<8} | Weight: {self.get_weight():>5} kg")
+
+    def calculate_shipping_cost(self):
+        """Shipping cost: base fee plus rate per kg."""
+        return 5.00 + self.get_weight() * 2.00
 
 class Inventory:
     """Manages a collection of products in the inventory."""
@@ -117,12 +134,8 @@ class Inventory:
         return False
     
     def display_all(self):
-        """Display all products in single-line format."""
-        if not self.__products:
-            print("Inventory is empty.")
-        else:
-            for product in self.__products:
-                product.display_single_line()
+        for product in self.__products:   # use your actual list name
+            product.display_information()
     
     def get_products(self):
         """Return the list of all products."""
@@ -406,12 +419,12 @@ class FileHandling:
         for item in data:
             if item.get("type") == "digital":
                 product = DigitalProduct(
-                    item["product_id"], item["name"], item["price"],
+                    item.get("product_id", item.get("id")), item["name"], item["price"],
                     item["quantity"], item["download_size"]
                 )
             else:
                 product = PhysicalProduct(
-                    item["product_id"], item["name"], item["price"],
+                    item.get("product_id", item.get("id")), item["name"], item["price"],
                     item["quantity"], item.get("weight", 0)
                 )
             inventory.add_product(product)
@@ -424,3 +437,4 @@ if __name__ == "__main__":
 
 #Eugene Repo URL: https://github.com/Eugene2603188/Lab7
 
+#if wanna test, run "inventory_test.py"
