@@ -3,7 +3,9 @@ import os
 
 from abc import ABC, abstractmethod
 
-file_name = "Week 9/inventory.json"
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+file_name = os.path.join(script_dir, "inventory.json")
 
 class CanBeShipped(ABC):
     """Interface for products that can be shipped."""
